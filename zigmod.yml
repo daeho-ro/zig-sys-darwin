@@ -3,5 +3,3 @@ name: sys-darwin
 main: sys_darwin.zig
 license: MIT
 description: OS bindings layer for interacting with macOS
-min_zig_version: 0.14.1
-dependencies:
