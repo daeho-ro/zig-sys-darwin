@@ -262,17 +262,20 @@ pub const errno = struct {
     }
 };
 
+// x86_64 needs the $INODE64 stat/dirent symbols to match the 64-bit structs below
+const inode64_suffix = if (builtin.target.cpu.arch == .x86_64) "$INODE64" else "";
+
 pub const libc = struct {
     pub extern fn __error() *c_int;
     pub extern fn openat(fd: c_int, file: [*:0]const u8, oflag: c_int, ...) c_int;
-    pub extern fn fstat(fd: c_int, buf: *struct_stat) c_int;
+    pub const fstat = @extern(*const fn (c_int, *struct_stat) callconv(.c) c_int, .{ .name = "fstat" ++ inode64_suffix });
     pub extern fn close(fildes: c_int) c_int;
     pub extern fn read(fd: c_int, buf: [*]u8, count: usize) isize;
     pub extern fn clock_gettime(clock_id: clockid_t, tp: *struct_timespec) c_int;
     pub extern fn fcntl(fd: c_int, cmd: c_int, ...) c_int;
     pub extern fn mkdirat(fd: c_int, path: [*:0]const u8, mode: mode_t) c_int;
-    pub extern fn fstatat(fd: c_int, noalias path: [*:0]const u8, noalias buf: *struct_stat, flag: c_int) c_int;
-    pub extern fn getdirentries(fd: c_int, buf: [*]u8, nbytes: c_int, basep: *c_long) c_int;
+    pub const fstatat = @extern(*const fn (c_int, [*:0]const u8, *struct_stat, c_int) callconv(.c) c_int, .{ .name = "fstatat" ++ inode64_suffix });
+    pub const getdirentries = @extern(*const fn (c_int, [*]u8, c_int, *c_long) callconv(.c) c_int, .{ .name = "getdirentries" ++ inode64_suffix });
     pub extern fn unlinkat(fd: c_int, name: [*:0]const u8, flag: c_int) c_int;
     pub extern fn write(fd: c_int, buf: *const anyopaque, n: usize) isize;
     pub extern fn writev(fd: c_int, iovec: [*]const struct_iovec, count: c_int) isize;
